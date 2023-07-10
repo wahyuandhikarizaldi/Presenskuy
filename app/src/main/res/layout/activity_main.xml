@@ -93,7 +93,15 @@
         android:background="#ffffff"
         android:layout_height="match_parent">
 
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/textView"
+            android:layout_marginTop="20dp"/>
+
     <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="105dp"
         android:layout_alignParentBottom="true"

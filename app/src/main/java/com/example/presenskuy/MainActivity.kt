@@ -19,6 +19,13 @@ import android.view.inputmethod.InputMethodManager
 import android.view.Menu
 import android.widget.PopupMenu
 import android.text.InputType
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 import android.text.Editable
 
@@ -38,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private var productName: String? = null
     private var productPass: String? = null
+    private lateinit var webView: WebView
 
     private fun setSend() {
 //        // Make API call to search for medicine products
@@ -84,6 +92,25 @@ class MainActivity : AppCompatActivity() {
 //        requestQueue.add(jsonObjectRequest) // Add the request to the request queue
     }
 
+    private fun fetchData() {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://akademik.its.ac.id/data_nilaimhs.php") // Ganti dengan URL endpoint yang sesuai
+            .addHeader("Cookie", "MASUKKAN COOKIE DISINI")
+            .build()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val response = client.newCall(request).execute()
+            val htmlBody = response.body?.string()
+
+            launch(Dispatchers.Main) {
+                htmlBody?.let {
+                    webView.loadDataWithBaseURL(null, htmlBody, "text/html", "UTF-8", null)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -91,6 +118,10 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar1)
         toolbar.title = ""
         setSupportActionBar(toolbar)
+
+        webView = findViewById(R.id.webView)
+        webView.webViewClient = WebViewClient()
+        webView.settings.javaScriptEnabled = true
 
         // Initialize the SharedPreferences object
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -135,7 +166,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         gambarsend.setOnClickListener {
-            setSend()
+//            setSend()
+            fetchData()
         }
     }
 
