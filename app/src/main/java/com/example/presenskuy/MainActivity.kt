@@ -26,8 +26,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
-
+import android.annotation.SuppressLint
+import android.webkit.CookieManager
 import android.text.Editable
+import android.util.Log
 
 import java.util.*
 
@@ -92,25 +94,17 @@ class MainActivity : AppCompatActivity() {
 //        requestQueue.add(jsonObjectRequest) // Add the request to the request queue
     }
 
-    private fun fetchData() {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://akademik.its.ac.id/data_nilaimhs.php") // Ganti dengan URL endpoint yang sesuai
-            .addHeader("Cookie", "MASUKKAN COOKIE DISINI")
-            .build()
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val response = client.newCall(request).execute()
-            val htmlBody = response.body?.string()
-
-            launch(Dispatchers.Main) {
-                htmlBody?.let {
-                    webView.loadDataWithBaseURL(null, htmlBody, "text/html", "UTF-8", null)
-                }
-            }
-        }
+    private fun clearWebViewData() {
+        webView.clearHistory()
+        CookieManager.getInstance().removeAllCookies(null)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        clearWebViewData()
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -122,6 +116,13 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webView)
         webView.webViewClient = WebViewClient()
         webView.settings.javaScriptEnabled = true
+        webView.setVerticalScrollBarEnabled(true)
+        webView.setHorizontalScrollBarEnabled(true)
+        webView.isVerticalScrollBarEnabled = true
+        webView.isHorizontalScrollBarEnabled = true
+        webView.setScrollbarFadingEnabled(false)
+        WebView.setWebContentsDebuggingEnabled(true)
+
 
         // Initialize the SharedPreferences object
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -166,8 +167,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         gambarsend.setOnClickListener {
-//            setSend()
-            fetchData()
+            setSend()
         }
     }
 
